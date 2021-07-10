@@ -24,7 +24,7 @@
             android:layout_height="match_parent"
             android:visibility="gone"
             app:layout_constraintTop_toTopOf="parent"
-            tools:context=".HomeFragment" />
+            tools:context=".ui.HomeFragment" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
