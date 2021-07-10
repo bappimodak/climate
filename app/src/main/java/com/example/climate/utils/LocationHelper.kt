@@ -4,6 +4,8 @@ import android.Manifest
 import android.content.Context
 import android.content.Context.LOCATION_SERVICE
 import android.content.pm.PackageManager
+import android.location.Address
+import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
 import androidx.core.app.ActivityCompat
@@ -12,13 +14,14 @@ import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.util.*
 
 
 /**
  * Helper class to access device last known location
  */
 class LocationHelper(private val context: Context) {
-
+    val geocoder: Geocoder = Geocoder(context, Locale.getDefault())
     /**
      * Get last known location of a device
      */
@@ -51,5 +54,29 @@ class LocationHelper(private val context: Context) {
                 onDone(location)
             }
         }
+    }
+    private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+    fun fetchLastKnownLocation(onDone: (Location?) -> Unit) {
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            throw SecurityException("App requires location permission")
+        }
+
+        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+            onDone(location)
+        }
+    }
+
+    /**
+     * Get addresses from location
+     */
+    fun getAddress(location: Location, maxResults: Int = 1 ): List<Address>? {
+        return geocoder.getFromLocation(location.latitude, location.longitude, maxResults).toList()
     }
 }

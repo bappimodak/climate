@@ -4,11 +4,11 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.climate.model.Coord
+import com.example.climate.model.City
 
-@Database(entities = arrayOf(Coord::class), version = 1)
+@Database(entities = arrayOf(City::class), version = 1)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun coord(): CoordDao
+    abstract fun coord(): CityDao
 
     companion object {
         private var instance: AppDatabase? = null

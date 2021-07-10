@@ -1,31 +1,40 @@
 package com.example.climate.viewmodel
 
 import android.content.Context
+import android.location.Location
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.climate.model.City
+import com.example.climate.repository.CityRepository
 import com.example.climate.utils.LocationHelper
-import com.example.climate.model.Coord
-import com.example.climate.repository.CoordRepository
-import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class WeatherViewModel(private val coordRepository: CoordRepository): ViewModel() {
-    lateinit var location: LatLng
+class WeatherViewModel(private val cityRepository: CityRepository) : ViewModel() {
+    lateinit var location: Location
 
-    fun getLastKnownLocation(context: Context, locationHelper: LocationHelper){
-        locationHelper.fetchLastKnownLocation(context) {
-            Log.e("HomeViewModel", "Last known location: $it")
+    var cityList = MutableLiveData<List<City>>().apply { value = null }
+
+    fun getLastKnownLocation(context: Context, locationHelper: LocationHelper) {
+        locationHelper.fetchLastKnownLocation {
+            Log.e("MainActivity", "Last known location: $it")
             if (it != null) {
-                location = LatLng(it.latitude, it.longitude)
+                location = it
             }
         }
     }
 
-    fun storeLocationInDB(coord: Coord) {
+    fun getCityList() {
         viewModelScope.launch(Dispatchers.IO) {
-            coordRepository.insertCoord(coord)
+            cityList.postValue(cityRepository.getCityList())
+        }
+    }
+
+    fun storeLocationInDB(cityAddress: City) {
+        viewModelScope.launch(Dispatchers.IO) {
+            cityRepository.insertCoord(cityAddress)
         }
     }
 }

@@ -3,4 +3,5 @@
     <string name="title_activity_maps">Climate</string>
     <string name="add">Add</string>
     <string name="location_added">Location bookmarked successfully</string>
+    <string name="no_bookmarked_location">No bookmarked locaton</string>
 </resources>

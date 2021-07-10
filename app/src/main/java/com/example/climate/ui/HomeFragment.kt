@@ -1,5 +1,6 @@
 package com.example.climate.ui
 
+import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,9 +8,12 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.climate.utils.LocationHelper
 import com.example.climate.R
 import com.example.climate.db.AppDatabase
+import com.example.climate.model.City
 import com.example.climate.model.Coord
 import com.example.climate.viewmodel.ViewModelFactory
 import com.example.climate.viewmodel.WeatherViewModel
@@ -21,7 +25,9 @@ import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.fragment_home.*
 
 class HomeFragment : Fragment() {
+    private lateinit var locationHelper: LocationHelper
     private lateinit var viewModel: WeatherViewModel
+    private lateinit var cityAdapter: CityAdapter
 
     private val callback = OnMapReadyCallback { googleMap ->
         /**
@@ -42,15 +48,23 @@ class HomeFragment : Fragment() {
             googleMap.clear()
             googleMap.addMarker(MarkerOptions().position(it))
             googleMap.moveCamera(CameraUpdateFactory.newLatLng(it))
+            viewModel.location.latitude = it.latitude
+            viewModel.location.longitude = it.longitude
+
+            val address = locationHelper.getAddress(viewModel.location)
+            val cityAddress = address?.get(0)?.getAddressLine(0)
 
             viewModel.storeLocationInDB(
-                Coord(lat = it.latitude, lon = it.longitude)
+                City(lat = it.latitude, lon = it.longitude, cityName = cityAddress?: "")
             )
+
             Toast.makeText(
                 activity as HomeActivity,
                 getString(R.string.location_added),
                 Toast.LENGTH_SHORT
             ).show()
+            viewModel.getCityList()
+            changeUI()
         }
     }
 
@@ -64,17 +78,54 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        locationHelper = LocationHelper(requireContext())
         viewModel = ViewModelProvider(
             this,
             ViewModelFactory(AppDatabase.getInstance(requireActivity()).coord())
         ).get(WeatherViewModel::class.java)
-        viewModel.getLastKnownLocation(requireActivity(), LocationHelper(requireActivity()))
+        viewModel.getCityList()
+        viewModel.getLastKnownLocation(requireActivity(), locationHelper)
+
+
+        setAdapter()
+        addObserver()
 
         fab.setOnClickListener {
             val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
             mapFragment?.getMapAsync(callback)
             map.visibility = View.VISIBLE
         }
+    }
+
+    private fun addObserver() {
+        viewModel.cityList.observe(viewLifecycleOwner, { list ->
+            if (list != null) {
+                cityAdapter.list = list
+                cityAdapter.notifyDataSetChanged()
+                controlListUI()
+            }
+        })
+    }
+
+    private fun controlListUI() {
+        if (cityAdapter.list.size == 0) {
+            cityRecyclerView.visibility = View.GONE
+            noItemAlertTV.visibility = View.VISIBLE
+        } else {
+            cityRecyclerView.visibility = View.VISIBLE
+            noItemAlertTV.visibility = View.GONE
+        }
+    }
+
+    private fun changeUI(){
+        map.visibility = View.GONE
+    }
+
+    private fun setAdapter() {
+        cityAdapter = CityAdapter(requireActivity())
+        cityRecyclerView.adapter = cityAdapter
+        cityRecyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        cityRecyclerView.addItemDecoration(DividerItemDecoration(cityRecyclerView.context, DividerItemDecoration.VERTICAL))
     }
 
     companion object {

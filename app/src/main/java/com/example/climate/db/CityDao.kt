@@ -4,13 +4,14 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.example.climate.model.City
 import com.example.climate.model.Coord
 
 @Dao
-interface CoordDao {
-    @Query("SELECT * FROM Coord LIMIT 1")
-    fun getTopRow(): Coord?
+interface CityDao {
+    @Query("SELECT * FROM City")
+    fun getCityList(): List<City>?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(coord: Coord)
+    fun insert(cityDetail: City)
 }
