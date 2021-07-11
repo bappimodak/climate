@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.climate.R
 import com.example.climate.model.City
 
-class CityAdapter(private var ctx: Context) : RecyclerView.Adapter<CityAdapter.ViewHolder>() {
+class CityAdapter(private var ctx: Context, private var callback: CityAdapter.CallBack) : RecyclerView.Adapter<CityAdapter.ViewHolder>() {
     var list:List<City> = ArrayList()
 
     inner class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
@@ -27,11 +27,16 @@ class CityAdapter(private var ctx: Context) : RecyclerView.Adapter<CityAdapter.V
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.cityTextView.text = list[position].cityName
         holder.fullCityLayout.setOnClickListener {
-            //add functionality
+            callback.cityOnClick(city = list[position])
         }
     }
 
     override fun getItemCount(): Int {
         return list.size
+    }
+
+    public interface CallBack{
+        fun cityOnClick(city: City);
+
     }
 }

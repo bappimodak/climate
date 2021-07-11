@@ -4,10 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Context.LOCATION_SERVICE
 import android.content.pm.PackageManager
-import android.location.Address
-import android.location.Geocoder
-import android.location.Location
-import android.location.LocationManager
+import android.location.*
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -67,9 +64,18 @@ class LocationHelper(private val context: Context) {
         ) {
             throw SecurityException("App requires location permission")
         }
+        val locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
 
-        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-            onDone(location)
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            val location = locationManager
+                .getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+            GlobalScope.launch(Dispatchers.Main) {
+                onDone(location)
+            }
+        } else {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                onDone(location)
+            }
         }
     }
 

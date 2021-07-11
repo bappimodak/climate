@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="weather"
+            type="com.example.climate.model.Weather" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/rootLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.MainActivity">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideLineStart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="40dp" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/cityTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:text="@{weather.name}"
+            android:textColor="#000"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="London" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tempTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@{weather.main.temp.toString()}"
+            android:textColor="#d23"
+            android:textSize="50sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cityTV"
+            tools:text="23" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/degreeTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/degree_symbol"
+            android:textColor="#d23"
+            android:textSize="40sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/tempTV"
+            app:layout_constraintTop_toTopOf="@id/tempTV" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/feelsLikeTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:text="@{`Feels Like:`+ weather.main.feelsLike}"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="@id/guideLineStart"
+            app:layout_constraintTop_toBottomOf="@id/tempTV" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/minTempTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@{`Min Temperature:`+ weather.main.tempMin}"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="@id/guideLineStart"
+            app:layout_constraintTop_toBottomOf="@id/feelsLikeTV" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/maxTempTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@{`Max Temperature:`+ weather.main.tempMax}"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="@id/guideLineStart"
+            app:layout_constraintTop_toBottomOf="@id/minTempTV" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/pressure"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@{`Pressure:`+ weather.main.pressure}"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="@id/guideLineStart"
+            app:layout_constraintTop_toBottomOf="@id/maxTempTV" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/humidity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@{`Humidity:`+ weather.main.humidity}"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="@id/guideLineStart"
+            app:layout_constraintTop_toBottomOf="@id/pressure" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/latitudeLabelTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/latitude"
+            android:textColor="#000"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@id/longitudeTV"
+            app:layout_constraintEnd_toStartOf="@id/latitudeTV"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/latitudeTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@{weather.coord.lat.toString()}"
+            android:textColor="#000"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toTopOf="@id/longitudeTV"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toEndOf="@id/latitudeLabelTV"
+            tools:text="20.33" />
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/longitudeLabelTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/longitude"
+            android:textColor="#000"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/longitudeTV"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/longitudeTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@{weather.coord.lon.toString()}"
+            android:textColor="#000"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toEndOf="@id/longitudeLabelTV"
+            tools:text="20.33" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:text="@string/weather"
+            android:textColor="#000"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/longitudeTV" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

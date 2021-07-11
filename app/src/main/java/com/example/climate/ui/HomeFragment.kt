@@ -10,11 +10,11 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.climate.utils.LocationHelper
 import com.example.climate.R
 import com.example.climate.db.AppDatabase
 import com.example.climate.model.City
-import com.example.climate.model.Coord
+import com.example.climate.network.RetrofitBuilder
+import com.example.climate.utils.LocationHelper
 import com.example.climate.viewmodel.ViewModelFactory
 import com.example.climate.viewmodel.WeatherViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -24,7 +24,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.fragment_home.*
 
-class HomeFragment : Fragment() {
+class HomeFragment : Fragment(){
     private lateinit var locationHelper: LocationHelper
     private lateinit var viewModel: WeatherViewModel
     private lateinit var cityAdapter: CityAdapter
@@ -55,7 +55,7 @@ class HomeFragment : Fragment() {
             val cityAddress = address?.get(0)?.getAddressLine(0)
 
             viewModel.storeLocationInDB(
-                City(lat = it.latitude, lon = it.longitude, cityName = cityAddress?: "")
+                City(lat = it.latitude, lon = it.longitude, cityName = cityAddress ?: "")
             )
 
             Toast.makeText(
@@ -79,10 +79,12 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         locationHelper = LocationHelper(requireContext())
+
         viewModel = ViewModelProvider(
-            this,
-            ViewModelFactory(AppDatabase.getInstance(requireActivity()).coord())
+            requireActivity(),
+            ViewModelFactory(AppDatabase.getInstance(requireActivity()).coord(), RetrofitBuilder.apiService)
         ).get(WeatherViewModel::class.java)
+
         viewModel.getCityList()
         viewModel.getLastKnownLocation(requireActivity(), locationHelper)
 
@@ -117,15 +119,29 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun changeUI(){
+    private fun changeUI() {
         map.visibility = View.GONE
     }
 
+
     private fun setAdapter() {
-        cityAdapter = CityAdapter(requireActivity())
+        cityAdapter = CityAdapter(requireActivity(), object : CityAdapter.CallBack{
+            override fun cityOnClick(city: City) {
+                viewModel.location.latitude = city.lat!!
+                viewModel.location.longitude = city.lon!!
+                (activity as HomeActivity).addFragmentOnTop(DetailFragment.newInstance())
+            }
+
+        })
         cityRecyclerView.adapter = cityAdapter
-        cityRecyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-        cityRecyclerView.addItemDecoration(DividerItemDecoration(cityRecyclerView.context, DividerItemDecoration.VERTICAL))
+        cityRecyclerView.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        cityRecyclerView.addItemDecoration(
+            DividerItemDecoration(
+                cityRecyclerView.context,
+                DividerItemDecoration.VERTICAL
+            )
+        )
     }
 
     companion object {
