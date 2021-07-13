@@ -3,10 +3,12 @@ package com.example.climate.ui
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.climate.R
 import com.example.climate.utils.PermissionHelper
+
 
 class HomeActivity : AppCompatActivity() {
 
@@ -28,6 +30,16 @@ class HomeActivity : AppCompatActivity() {
             LOCATION_PERMISSION_REQUESTCODE
         )
 
+    }
+
+    override fun onBackPressed() {
+        val fragments = supportFragmentManager
+        val currentFragment = fragments.findFragmentById(R.id.container)
+        if (currentFragment is HomeFragment) {
+            finish()
+        } else {
+            super.onBackPressed()
+        }
     }
 
     override fun onRequestPermissionsResult(

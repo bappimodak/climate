@@ -5,15 +5,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 
 import com.example.climate.BR
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.climate.R
 import com.example.climate.db.AppDatabase
 import com.example.climate.network.RetrofitBuilder
+import com.example.climate.utils.Status
 import com.example.climate.viewmodel.ViewModelFactory
 import com.example.climate.viewmodel.WeatherViewModel
 
@@ -27,6 +30,7 @@ class DetailFragment : Fragment() {
     ): View? {
         viewDataBinding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_detail, container, false)
+        activity?.title = "City Weather";
         return viewDataBinding.root
     }
 
@@ -40,18 +44,37 @@ class DetailFragment : Fragment() {
                 RetrofitBuilder.apiService
             )
         ).get(WeatherViewModel::class.java)
-//        viewModel.getCityWeather(viewModel.location)
+        viewModel.getCityWeather(viewModel.location)
+
         addObserver()
 
     }
 
     private fun addObserver() {
-        viewModel.getCityWeather(viewModel.location).observe(
-            viewLifecycleOwner, {
-                if (it != null) {
-                    viewDataBinding.setVariable(BR.weather, viewModel.weather.value)
+//        viewModel.getCityWeather(viewModel.location).observe(
+//            viewLifecycleOwner, {
+//                if (it != null) {
+//                    viewDataBinding.setVariable(BR.weather, viewModel.weather.value)
+//                }
+//            })
+        viewModel.weather.observe(requireActivity(), Observer {
+            it.let { resource ->
+                when(resource.status){
+                    Status.SUCCESS -> {
+                        resource.data?.let { list ->
+                            viewDataBinding.setVariable(BR.weather, list)
+                        }
+                    }
+                    Status.ERROR -> {
+                        Toast.makeText(requireContext(), resource.message, Toast.LENGTH_LONG).show()
+                    }
+                    Status.LOADING -> {
+//                        recyclerView.visibility = View.GONE
+//                        progressBar.visibility = View.VISIBLE
+                    }
                 }
-            })
+            }
+        })
     }
 
     companion object {

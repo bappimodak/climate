@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,6 +16,7 @@ import com.example.climate.db.AppDatabase
 import com.example.climate.model.City
 import com.example.climate.network.RetrofitBuilder
 import com.example.climate.utils.LocationHelper
+import com.example.climate.utils.Status
 import com.example.climate.viewmodel.ViewModelFactory
 import com.example.climate.viewmodel.WeatherViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -73,7 +75,10 @@ class HomeFragment : Fragment(){
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_home, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_home, container, false)
+        activity?.title = "Bookmarked Cities";
+        return rootView
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -100,11 +105,31 @@ class HomeFragment : Fragment(){
     }
 
     private fun addObserver() {
-        viewModel.cityList.observe(viewLifecycleOwner, { list ->
-            if (list != null) {
-                cityAdapter.list = list
-                cityAdapter.notifyDataSetChanged()
-                controlListUI()
+//        viewModel.cityList.observe(viewLifecycleOwner, { list ->
+//            if (list != null) {
+//                cityAdapter.list = list
+//                cityAdapter.notifyDataSetChanged()
+//                controlListUI()
+//            }
+//        })
+        viewModel.cityList.observe(requireActivity(), Observer {
+            it.let { resource ->
+                when(resource.status){
+                    Status.SUCCESS -> {
+                        resource.data?.let { list ->
+                            cityAdapter.list = list
+                            cityAdapter.notifyDataSetChanged()
+                            controlListUI()
+                        }
+                    }
+                    Status.ERROR -> {
+                        Toast.makeText(requireContext(), resource.message, Toast.LENGTH_LONG).show()
+                    }
+                    Status.LOADING -> {
+//                        recyclerView.visibility = View.GONE
+//                        progressBar.visibility = View.VISIBLE
+                    }
+                }
             }
         })
     }

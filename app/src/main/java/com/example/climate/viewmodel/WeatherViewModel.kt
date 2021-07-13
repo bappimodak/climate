@@ -11,6 +11,7 @@ import com.example.climate.model.Weather
 import com.example.climate.repository.CityRepository
 import com.example.climate.repository.WeatherRepository
 import com.example.climate.utils.LocationHelper
+import com.example.climate.utils.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -21,8 +22,8 @@ class WeatherViewModel(
 ) : ViewModel() {
     lateinit var location: Location
 
-    var cityList = MutableLiveData<List<City>>().apply { value = null }
-    var weather = MutableLiveData<Weather>().apply { value = null }
+    var cityList = MutableLiveData<Resource<List<City>>>()/*.apply { value = null }*/
+    var weather = MutableLiveData<Resource<Weather>>()/*.apply { value = null }*/
 
     fun getLastKnownLocation(context: Context, locationHelper: LocationHelper) {
         viewModelScope.launch(Dispatchers.Default) {
@@ -37,7 +38,14 @@ class WeatherViewModel(
 
     fun getCityList() {
         viewModelScope.launch(Dispatchers.IO) {
-            cityList.postValue(cityRepository.getCityList())
+            cityList.postValue(Resource.loading(null))
+            try {
+                val response = cityRepository.getCityList()
+                cityList.postValue(Resource.success(response))
+            } catch (e: Exception) {
+                cityList.postValue(Resource.error(e.toString(), null))
+            }
+//            cityList.postValue(cityRepository.getCityList())
         }
     }
 
@@ -47,16 +55,22 @@ class WeatherViewModel(
         }
     }
 
-    fun getCityWeather(location: Location): MutableLiveData<Weather> {
+    fun getCityWeather(location: Location) {
         viewModelScope.launch(Dispatchers.Default) {
-            val w: Weather = weatherRepository.fetchWeather(location)
-            Log.d("WeatherViewModel", w.toString())
-            withContext(Dispatchers.Main){
-                weather.value = w
+
+            weather.postValue(Resource.loading(null))
+            try {
+                val w: Weather = weatherRepository.fetchWeather(location)
+                weather.postValue(Resource.success(w))
+            } catch (e: Exception) {
+                weather.postValue(Resource.error(e.toString(), null))
             }
+//            Log.d("WeatherViewModel", w.toString())
+//            withContext(Dispatchers.Main){
+//                weather.value = w
+//            }
             Log.d("WeatherViewModel", weather.value.toString())
 
         }
-        return weather
     }
 }
