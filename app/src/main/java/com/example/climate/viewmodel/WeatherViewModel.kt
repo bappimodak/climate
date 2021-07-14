@@ -14,7 +14,6 @@ import com.example.climate.utils.LocationHelper
 import com.example.climate.utils.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class WeatherViewModel(
     private val cityRepository: CityRepository,
@@ -22,8 +21,8 @@ class WeatherViewModel(
 ) : ViewModel() {
     lateinit var location: Location
 
-    var cityList = MutableLiveData<Resource<List<City>>>()/*.apply { value = null }*/
-    var weather = MutableLiveData<Resource<Weather>>()/*.apply { value = null }*/
+    var cityList = MutableLiveData<Resource<List<City>>>()
+    var weather = MutableLiveData<Resource<Weather>>()
 
     fun getLastKnownLocation(context: Context, locationHelper: LocationHelper) {
         viewModelScope.launch(Dispatchers.Default) {
@@ -37,7 +36,7 @@ class WeatherViewModel(
     }
 
     fun getCityList() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             cityList.postValue(Resource.loading(null))
             try {
                 val response = cityRepository.getCityList()
@@ -45,7 +44,6 @@ class WeatherViewModel(
             } catch (e: Exception) {
                 cityList.postValue(Resource.error(e.toString(), null))
             }
-//            cityList.postValue(cityRepository.getCityList())
         }
     }
 
@@ -56,8 +54,7 @@ class WeatherViewModel(
     }
 
     fun getCityWeather(location: Location) {
-        viewModelScope.launch(Dispatchers.Default) {
-
+        viewModelScope.launch {
             weather.postValue(Resource.loading(null))
             try {
                 val w: Weather = weatherRepository.fetchWeather(location)
@@ -65,12 +62,6 @@ class WeatherViewModel(
             } catch (e: Exception) {
                 weather.postValue(Resource.error(e.toString(), null))
             }
-//            Log.d("WeatherViewModel", w.toString())
-//            withContext(Dispatchers.Main){
-//                weather.value = w
-//            }
-            Log.d("WeatherViewModel", weather.value.toString())
-
         }
     }
 }

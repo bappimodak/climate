@@ -10,7 +10,7 @@ import com.example.climate.model.Coord
 @Dao
 interface CityDao {
     @Query("SELECT * FROM City")
-    fun getCityList(): List<City>?
+    suspend fun getCityList(): List<City>?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(cityDetail: City)
