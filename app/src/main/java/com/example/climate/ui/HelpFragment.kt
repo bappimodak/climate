@@ -16,7 +16,9 @@ class HelpFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_help, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_help, container, false)
+        activity?.title = "Help";
+        return rootView
     }
 
     //    var webview: WebView = WebView(App.instance)
@@ -32,7 +34,7 @@ class HelpFragment : Fragment() {
 
         webview.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView, url: String) {
-
+                progressbar?.visibility = View.GONE
             }
 
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {

@@ -3,7 +3,8 @@ package com.example.climate.ui
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
-import androidx.appcompat.app.ActionBar
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.climate.R
@@ -36,7 +37,9 @@ class HomeActivity : AppCompatActivity() {
         val fragments = supportFragmentManager
         val currentFragment = fragments.findFragmentById(R.id.container)
         if (currentFragment is HomeFragment) {
-            finish()
+            if(currentFragment.canGoBack()){
+                finish()
+            }
         } else {
             super.onBackPressed()
         }
@@ -69,6 +72,21 @@ class HomeActivity : AppCompatActivity() {
             .addToBackStack(null)
             .commit()
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val inflater = menuInflater
+        inflater.inflate(R.menu.app_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if(item.itemId == R.id.help){
+            addFragmentOnTop(HelpFragment.newInstance())
+            return true
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 
     companion object {
         const val LOCATION_PERMISSION_REQUESTCODE = 1000

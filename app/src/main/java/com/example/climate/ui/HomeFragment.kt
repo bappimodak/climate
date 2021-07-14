@@ -2,6 +2,7 @@ package com.example.climate.ui
 
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,6 +26,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.fragment_home.*
+import java.util.concurrent.TimeUnit
 
 class HomeFragment : Fragment(){
     private lateinit var locationHelper: LocationHelper
@@ -32,15 +34,6 @@ class HomeFragment : Fragment(){
     private lateinit var cityAdapter: CityAdapter
 
     private val callback = OnMapReadyCallback { googleMap ->
-        /**
-         * Manipulates the map once available.
-         * This callback is triggered when the map is ready to be used.
-         * This is where we can add markers or lines, add listeners or move the camera.
-         * In this case, we just add a marker near Sydney, Australia.
-         * If Google Play services is not installed on the device, the user will be prompted to
-         * install it inside the SupportMapFragment. This method will only be triggered once the
-         * user has installed Google Play services and returned to the app.
-         */
         val currentLocation = LatLng(viewModel.location.latitude, viewModel.location.longitude)
 
         googleMap.addMarker(MarkerOptions().position(currentLocation).title("Current Location"))
@@ -83,6 +76,10 @@ class HomeFragment : Fragment(){
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        locationHelper = LocationHelper(requireContext())
+        locationHelper.request?.interval = TimeUnit.SECONDS.toMillis(8)
+        locationHelper.listener = locationListener
         locationHelper = LocationHelper(requireContext())
 
         viewModel = ViewModelProvider(
@@ -105,16 +102,9 @@ class HomeFragment : Fragment(){
     }
 
     private fun addObserver() {
-//        viewModel.cityList.observe(viewLifecycleOwner, { list ->
-//            if (list != null) {
-//                cityAdapter.list = list
-//                cityAdapter.notifyDataSetChanged()
-//                controlListUI()
-//            }
-//        })
         viewModel.cityList.observe(requireActivity(), Observer {
             it.let { resource ->
-                when(resource.status){
+                when (resource.status) {
                     Status.SUCCESS -> {
                         resource.data?.let { list ->
                             cityAdapter.list = list
@@ -144,10 +134,23 @@ class HomeFragment : Fragment(){
         }
     }
 
+    private val locationListener: (Location?) -> Unit = {
+        Log.e("MainActivity", "New location: $it")
+        it?.let { viewModel.location = it }
+    }
+
     private fun changeUI() {
         map.visibility = View.GONE
     }
 
+    fun canGoBack(): Boolean {
+        return if(map.visibility == View.VISIBLE){
+            changeUI()
+            false
+        } else {
+            true
+        }
+    }
 
     private fun setAdapter() {
         cityAdapter = CityAdapter(requireActivity(), object : CityAdapter.CallBack{
